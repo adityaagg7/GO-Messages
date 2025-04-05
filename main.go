@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gofiber/fiber/v2"
 	"log"
-	"messages-go/databases/mongo/messager"
+	"messages-go/internal/databases/mongo/messager"
 	"messages-go/routes"
 	"os"
 	"os/signal"
@@ -15,13 +15,13 @@ import (
 // main is the entry point of the application, initializing the database, setting up routes, and starting the HTTP server.
 func main() {
 	// Initialize database
-	messager.ConnectDB()
+	var db = messager.ConnectDB()
 
 	// Create a new Fiber instance
 	app := fiber.New()
 
 	// Set up routes
-	routes.SetupRoutes(app)
+	routes.SetupRoutes(app, db)
 
 	// Create a channel to listen for termination signals
 	quit := make(chan os.Signal, 1)
