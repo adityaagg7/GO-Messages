@@ -2,12 +2,16 @@ package room
 
 import (
 	"context"
+	"errors"
+	"go.mongodb.org/mongo-driver/mongo"
 	room_model "messages-go/models/mongo_messager/room"
 	"messages-go/models/request"
 	room_repo "messages-go/repos/mongo_messager/room"
 	"messages-go/utils"
 	"strings"
 )
+
+var ErrRoomNotFound = errors.New("room not found")
 
 // RoomService defines the interface for managing room operations, including creation and retrieval of rooms.
 type RoomService interface {
@@ -40,5 +44,9 @@ func (rs *RoomServiceImpl) CreateRoom(ctx context.Context, req request.CreateRoo
 
 // GetRoom retrieves a room by its unique identifier from the repository and returns the room or an error if not found.
 func (rs *RoomServiceImpl) GetRoom(ctx context.Context, id string) (*room_model.Room, error) {
-	return rs.roomRepo.GetRoomByID(ctx, id)
+	room, err := rs.roomRepo.GetRoomByID(ctx, id)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, ErrRoomNotFound
+	}
+	return room, err
 }

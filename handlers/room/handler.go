@@ -3,7 +3,6 @@ package room
 import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"messages-go/models/request"
 	"messages-go/models/response"
@@ -75,7 +74,7 @@ func (rh *RoomHandlerImpl) GetRoom(c *fiber.Ctx) error {
 
 	getRoomResp, err := rh.roomService.GetRoom(c.Context(), roomId)
 
-	if errors.Is(err, mongo.ErrNoDocuments) {
+	if errors.Is(err, room.ErrRoomNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(response.APIResponse{
 			Error:   err.Error(),
 			Status:  fiber.StatusNotFound,
