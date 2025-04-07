@@ -15,4 +15,5 @@ func SetupRoutes(app *fiber.App, client *mongo.Client) {
 
 	roomGroup.Post("/", roomHandler.CreateRoom)
 	roomGroup.Get("/:id", roomHandler.GetRoom)
+	roomGroup.Patch("/:id", roomHandler.UpdateRoomName)
 }

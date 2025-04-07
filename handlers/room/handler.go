@@ -14,6 +14,7 @@ import (
 type RoomHandler interface {
 	CreateRoom(c *fiber.Ctx) error
 	GetRoom(c *fiber.Ctx) error
+	UpdateRoomName(c *fiber.Ctx) error
 }
 
 // RoomHandlerImpl implements the RoomHandler interface and handles HTTP requests related to room operations.
@@ -93,4 +94,49 @@ func (rh *RoomHandlerImpl) GetRoom(c *fiber.Ctx) error {
 		Message: "Room Found",
 		Data:    getRoomResp,
 	})
+}
+
+// UpdateRoomName handles updating the name of an existing room using the room ID and the new name provided in the request body.
+func (rh *RoomHandlerImpl) UpdateRoomName(c *fiber.Ctx) error {
+	roomId := c.Params("id")
+	var req request.UpdateRoomRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response.APIResponse{
+			Error:   err.Error(),
+			Status:  fiber.StatusBadRequest,
+			Message: "Invalid Request Body",
+		})
+	}
+
+	log.Println("Update Room with id ", roomId, " Request Received.")
+
+	roomResp, err := rh.roomService.UpdateRoomName(c.Context(), roomId, *req.Name)
+
+	if errors.Is(err, room.ErrRoomNotFound) {
+		return c.Status(fiber.StatusNotFound).JSON(response.APIResponse{
+			Error:   err.Error(),
+			Status:  fiber.StatusNotFound,
+			Message: "No Room Found with given id.",
+		})
+	} else if errors.Is(err, room.ErrMongoWriteFailed) {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.APIResponse{
+			Error:   err.Error(),
+			Status:  fiber.StatusInternalServerError,
+			Message: "Failed To Update Room",
+		})
+	} else if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.APIResponse{
+			Error:   err.Error(),
+			Status:  fiber.StatusInternalServerError,
+			Message: "Failed To Create Room",
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(response.APIResponse{
+		Status:  fiber.StatusCreated,
+		Message: "Room Created",
+		Data:    roomResp,
+	})
+
 }

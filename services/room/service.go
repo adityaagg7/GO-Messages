@@ -11,12 +11,16 @@ import (
 	"strings"
 )
 
-var ErrRoomNotFound = errors.New("room not found")
+var (
+	ErrRoomNotFound     = errors.New("room not found")
+	ErrMongoWriteFailed = errors.New("mongo write failed")
+)
 
 // RoomService defines the interface for managing room operations, including creation and retrieval of rooms.
 type RoomService interface {
 	CreateRoom(ctx context.Context, req request.CreateRoomRequest) (*room_model.Room, error)
 	GetRoom(ctx context.Context, id string) (*room_model.Room, error)
+	UpdateRoomName(ctx context.Context, id string, name string) (*room_model.Room, error)
 }
 
 // RoomServiceImpl is a service that handles business logic related to room operations using a room repository.
@@ -49,4 +53,17 @@ func (rs *RoomServiceImpl) GetRoom(ctx context.Context, id string) (*room_model.
 		return nil, ErrRoomNotFound
 	}
 	return room, err
+}
+
+// UpdateRoomName updates the name of an existing room by its ID in the repository and returns the updated room or an error.
+func (rs *RoomServiceImpl) UpdateRoomName(ctx context.Context, id string, name string) (*room_model.Room, error) {
+	updatedRoom, err := rs.roomRepo.UpdateRoomName(ctx, id, name)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, ErrRoomNotFound
+		}
+		return nil, ErrMongoWriteFailed
+	}
+	return updatedRoom, nil
+
 }

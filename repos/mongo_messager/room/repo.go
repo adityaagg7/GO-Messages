@@ -6,6 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"messages-go/models/mongo_messager/room"
 	"os"
 	"time"
@@ -15,7 +16,7 @@ import (
 type RepoRoom interface {
 	CreateRoom(ctx context.Context, room *room.Room) (*room.Room, error)
 	GetRoomByID(ctx context.Context, id string) (*room.Room, error)
-	UpdateRoomName(ctx context.Context, id string, name string) error
+	UpdateRoomName(ctx context.Context, id string, name string) (*room.Room, error)
 }
 
 // RepoRoomImpl is a concrete implementation of the RepoRoom interface.
@@ -66,21 +67,27 @@ func (r *RepoRoomImpl) GetRoomByID(ctx context.Context, id string) (*room.Room, 
 	return &rm, err
 }
 
-// UpdateRoomName updates the name of a room in the database based on the provided room ID and new name.
-func (r *RepoRoomImpl) UpdateRoomName(ctx context.Context, id string, name string) error {
+// UpdateRoomName updates the name of a room identified by its ID in the database and returns the updated room or an error.
+func (r *RepoRoomImpl) UpdateRoomName(ctx context.Context, id string, name string) (*room.Room, error) {
 	timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return errors.New("invalid ID format")
+		return nil, errors.New("invalid ID format")
 	}
 
-	_, err = r.roomCollection.UpdateOne(
+	var updatedRoom room.Room
+
+	err = r.roomCollection.FindOneAndUpdate(
 		timeoutCtx,
 		bson.M{"_id": objID},
 		bson.M{"$set": bson.M{"name": name}},
-	)
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
+	).Decode(&updatedRoom)
 
-	return err
+	if err != nil {
+		return nil, err
+	}
+	return &updatedRoom, nil
 }
