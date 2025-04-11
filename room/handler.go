@@ -6,7 +6,6 @@ import (
 	"log"
 	"messages-go/models/request"
 	"messages-go/models/response"
-	"messages-go/services/room"
 	"strings"
 )
 
@@ -19,11 +18,11 @@ type RoomHandler interface {
 
 // RoomHandlerImpl implements the RoomHandler interface and handles HTTP requests related to room operations.
 type RoomHandlerImpl struct {
-	roomService room.RoomService
+	roomService RoomService
 }
 
 // NewRoomHandler initializes and returns a new RoomHandler with the provided RoomService implementation.
-func NewRoomHandler(roomService room.RoomService) RoomHandler {
+func NewRoomHandler(roomService RoomService) RoomHandler {
 	return &RoomHandlerImpl{roomService: roomService}
 }
 
@@ -75,7 +74,7 @@ func (rh *RoomHandlerImpl) GetRoom(c *fiber.Ctx) error {
 
 	getRoomResp, err := rh.roomService.GetRoom(c.Context(), roomId)
 
-	if errors.Is(err, room.ErrRoomNotFound) {
+	if errors.Is(err, ErrRoomNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(response.APIResponse{
 			Error:   err.Error(),
 			Status:  fiber.StatusNotFound,
@@ -113,29 +112,29 @@ func (rh *RoomHandlerImpl) UpdateRoomName(c *fiber.Ctx) error {
 
 	roomResp, err := rh.roomService.UpdateRoomName(c.Context(), roomId, *req.Name)
 
-	if errors.Is(err, room.ErrRoomNotFound) {
+	if errors.Is(err, ErrRoomNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(response.APIResponse{
 			Error:   err.Error(),
 			Status:  fiber.StatusNotFound,
 			Message: "No Room Found with given id.",
 		})
-	} else if errors.Is(err, room.ErrMongoWriteFailed) {
+	} else if errors.Is(err, ErrMongoWriteFailed) {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.APIResponse{
 			Error:   err.Error(),
 			Status:  fiber.StatusInternalServerError,
-			Message: "Failed To Update Room",
+			Message: "Failed To Write Updated Room",
 		})
 	} else if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.APIResponse{
 			Error:   err.Error(),
 			Status:  fiber.StatusInternalServerError,
-			Message: "Failed To Create Room",
+			Message: "Failed To Update Room",
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(response.APIResponse{
-		Status:  fiber.StatusCreated,
-		Message: "Room Created",
+	return c.Status(fiber.StatusOK).JSON(response.APIResponse{
+		Status:  fiber.StatusOK,
+		Message: "Room Updated",
 		Data:    roomResp,
 	})
 
