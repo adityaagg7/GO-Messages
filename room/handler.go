@@ -59,27 +59,27 @@ func (rh *RoomHandlerImpl) CreateRoom(c *fiber.Ctx) error {
 
 // GetRoom handles the retrieval of a room by its ID from the path parameter and returns the room information as a response.
 func (rh *RoomHandlerImpl) GetRoom(c *fiber.Ctx) error {
-	var roomId string
+	var roomName string
 
-	roomId = c.Params("id")
+	roomName = c.Params("name")
 
-	if strings.TrimSpace(roomId) == "" {
+	if strings.TrimSpace(roomName) == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(response.APIResponse{
-			Error:   "Missing room ID in path",
+			Error:   "Missing room name in path",
 			Status:  fiber.StatusBadRequest,
-			Message: "id Path Variable is required to be not empty.",
+			Message: "name Path Variable is required to be not empty.",
 		})
 	}
 
-	log.Println("Get Room with id: ", roomId, " Request Received.")
+	log.Println("Get Room with name: ", roomName, " Request Received.")
 
-	getRoomResp, err := rh.roomService.GetRoom(c.Context(), roomId)
+	getRoomResp, err := rh.roomService.GetRoom(c.Context(), roomName)
 
 	if errors.Is(err, errormodel.ErrRoomNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(response.APIResponse{
 			Error:   err.Error(),
 			Status:  fiber.StatusNotFound,
-			Message: "No Room Found with given id.",
+			Message: "No Room Found with given name.",
 		})
 	} else if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.APIResponse{

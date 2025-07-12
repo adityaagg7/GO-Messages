@@ -15,6 +15,7 @@ import (
 type RoomRepo interface {
 	CreateRoom(ctx context.Context, room *Room) (*Room, error)
 	GetRoomByID(ctx context.Context, id string) (*Room, error)
+	GetRoomByName(ctx context.Context, name string) (*Room, error)
 	UpdateRoomName(ctx context.Context, id string, name string) (*Room, error)
 }
 
@@ -60,6 +61,20 @@ func (r *RoomRepoImpl) GetRoomByID(ctx context.Context, id string) (*Room, error
 
 	var rm Room
 	err = r.roomCollection.FindOne(timeoutCtx, bson.M{"_id": objID}).Decode(&rm)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, err
+	}
+	return &rm, err
+
+}
+
+// GetRoomByName retrieves a room by its name from the database.
+// Returns the room or nil if not found, and an error if any issue occurs during the operation.
+func (r *RoomRepoImpl) GetRoomByName(ctx context.Context, name string) (*Room, error) {
+	timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	var rm Room
+	err := r.roomCollection.FindOne(timeoutCtx, bson.M{"name": name}).Decode(&rm)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, err
 	}

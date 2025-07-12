@@ -13,7 +13,7 @@ import (
 // RoomService defines the interface for managing room operations, including creation and retrieval of rooms.
 type RoomService interface {
 	CreateRoom(ctx context.Context, req request.CreateRoomRequest) (*Room, error)
-	GetRoom(ctx context.Context, id string) (*Room, error)
+	GetRoom(ctx context.Context, name string) (*Room, error)
 	UpdateRoomName(ctx context.Context, id string, name string) (*Room, error)
 }
 
@@ -41,8 +41,8 @@ func (rs *RoomServiceImpl) CreateRoom(ctx context.Context, req request.CreateRoo
 }
 
 // GetRoom retrieves a room by its unique identifier from the repository and returns the room or an error if not found.
-func (rs *RoomServiceImpl) GetRoom(ctx context.Context, id string) (*Room, error) {
-	room, err := rs.roomRepo.GetRoomByID(ctx, id)
+func (rs *RoomServiceImpl) GetRoom(ctx context.Context, name string) (*Room, error) {
+	room, err := rs.roomRepo.GetRoomByName(ctx, name)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, errormodel.ErrRoomNotFound
 	}

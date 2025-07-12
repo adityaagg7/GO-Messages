@@ -5,7 +5,7 @@ go 1.24.2
 require (
 	github.com/dillonstreator/go-unique-name-generator v1.0.2
 	github.com/gofiber/fiber/v2 v2.52.6
-	github.com/google/wire v0.6.0
+	github.com/gofiber/websocket/v2 v2.2.1
 	github.com/joho/godotenv v1.5.1
 	go.mongodb.org/mongo-driver v1.17.3
 )
@@ -13,7 +13,6 @@ require (
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/fasthttp/websocket v1.5.3 // indirect
-	github.com/gofiber/websocket/v2 v2.2.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect

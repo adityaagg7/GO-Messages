@@ -35,14 +35,14 @@ func SetupRoutes(app *fiber.App, client *mongo.Client) {
 func setupRoomRoutes(api fiber.Router, handler room.RoomHandler) {
 	roomGroup := api.Group("/room")
 	roomGroup.Post("/", handler.CreateRoom)
-	roomGroup.Get("/:id", handler.GetRoom)
+	roomGroup.Get("/:name", handler.GetRoom)
 	roomGroup.Patch("/:id", handler.UpdateRoomName)
 }
 
 func setupMessageRoutes(api fiber.Router, handler message.MessageHandler) {
 	messageGroup := api.Group("/message")
 	messageGroup.Post("/", handler.PostMessage)
-	messageGroup.Get("/:roomId", handler.GetMessages)
+	messageGroup.Get("/:roomName", handler.GetMessages)
 }
 
 func setupWebSocketRoutes(app *fiber.App, wsHandler *ws.Handler) {

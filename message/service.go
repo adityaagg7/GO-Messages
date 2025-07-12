@@ -11,7 +11,7 @@ import (
 
 type MessageService interface {
 	PostMessage(ctx context.Context, msg *Message) (*Message, error)
-	GetMessages(ctx context.Context, id string) ([]Message, error)
+	GetMessages(ctx context.Context, roomName string) ([]Message, error)
 }
 
 type MessageServiceImpl struct {
@@ -35,8 +35,13 @@ func (ms *MessageServiceImpl) PostMessage(ctx context.Context, msg *Message) (*M
 	return ms.messageRepo.PostMessage(ctx, msg)
 }
 
-func (ms *MessageServiceImpl) GetMessages(ctx context.Context, roomId string) ([]Message, error) {
-	messageList, err := ms.messageRepo.GetMessagesByRoomId(ctx, roomId)
+func (ms *MessageServiceImpl) GetMessages(ctx context.Context, roomName string) ([]Message, error) {
+	roomData, err := ms.roomRepo.GetRoomByName(ctx, roomName)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, errormodel.ErrRoomNotFound
+	}
+	log.Println("Getting Messages for: ", roomData.ID.String())
+	messageList, err := ms.messageRepo.GetMessagesByRoomId(ctx, roomData.ID)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, errormodel.ErrMessagesNotFound
 	}

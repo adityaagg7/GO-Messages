@@ -60,24 +60,29 @@ func (mh *MessageHandlerImpl) PostMessage(c *fiber.Ctx) error {
 
 func (mh *MessageHandlerImpl) GetMessages(c *fiber.Ctx) error {
 
-	var roomId = c.Params("roomId")
-	if strings.TrimSpace(roomId) == "" {
+	var roomName = c.Params("roomName")
+	if strings.TrimSpace(roomName) == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(response.APIResponse{
-			Error:   "Missing room ID in path",
+			Error:   "Missing room name in path",
 			Status:  fiber.StatusBadRequest,
-			Message: "roomId Path Variable is required to be not empty.",
+			Message: "roomName Path Variable is required to be not empty.",
 		})
 	}
 
-	log.Println("Get Messages from Room with id: ", roomId, " Request Received.")
-
-	getMessageResp, err := mh.messageService.GetMessages(c.Context(), roomId)
+	log.Println("Get Messages from Room with name: ", roomName, " Request Received.")
+	getMessageResp, err := mh.messageService.GetMessages(c.Context(), roomName)
 
 	if errors.Is(err, errormodel.ErrMessagesNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(response.APIResponse{
 			Error:   err.Error(),
 			Status:  fiber.StatusNotFound,
-			Message: "No Room Found with given id.",
+			Message: "No messages Found with given roomname.",
+		})
+	} else if errors.Is(err, errormodel.ErrRoomNotFound) {
+		return c.Status(fiber.StatusNotFound).JSON(response.APIResponse{
+			Error:   err.Error(),
+			Status:  fiber.StatusNotFound,
+			Message: "No Room found given roomname.",
 		})
 	} else if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.APIResponse{

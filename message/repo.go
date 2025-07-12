@@ -13,7 +13,7 @@ import (
 
 type MessageRepo interface {
 	PostMessage(ctx context.Context, msg *Message) (*Message, error)
-	GetMessagesByRoomId(ctx context.Context, roomID string) ([]Message, error)
+	GetMessagesByRoomId(ctx context.Context, roomID primitive.ObjectID) ([]Message, error)
 }
 
 type MessageRepoImpl struct {
@@ -43,11 +43,11 @@ func (r *MessageRepoImpl) PostMessage(ctx context.Context, msg *Message) (*Messa
 
 // GetMessagesByRoomId retrieves all messages for a given room ID from the database.
 // Returns the list of messages or an error if any issue occurs during the operation.
-func (r *MessageRepoImpl) GetMessagesByRoomId(ctx context.Context, roomID string) ([]Message, error) {
+func (r *MessageRepoImpl) GetMessagesByRoomId(ctx context.Context, roomID primitive.ObjectID) ([]Message, error) {
 	timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	filter := bson.M{"room_id": roomID}
+	filter := bson.M{"room_id": roomID.Hex()}
 
 	opts := options.Find().SetSort(bson.D{{Key: "_id", Value: 1}})
 	cursor, err := r.messageCollection.Find(timeoutCtx, filter, opts)
