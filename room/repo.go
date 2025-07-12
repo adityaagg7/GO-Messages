@@ -11,28 +11,28 @@ import (
 	"time"
 )
 
-// RepoRoom defines an interface for room persistence operations including create, retrieve, and update functionalities.
-type RepoRoom interface {
+// RoomRepo defines an interface for room persistence operations including create, retrieve, and update functionalities.
+type RoomRepo interface {
 	CreateRoom(ctx context.Context, room *Room) (*Room, error)
 	GetRoomByID(ctx context.Context, id string) (*Room, error)
 	UpdateRoomName(ctx context.Context, id string, name string) (*Room, error)
 }
 
-// RepoRoomImpl is a concrete implementation of the RepoRoom interface.
+// RoomRepoImpl is a concrete implementation of the RoomRepo interface.
 // It interacts with the MongoDB collection to manage room data.
-type RepoRoomImpl struct {
+type RoomRepoImpl struct {
 	roomCollection *mongo.Collection
 }
 
-// NewRoomRepository initializes and returns a new instance of RepoRoom for managing room data in MongoDB.
-func NewRoomRepository(client *mongo.Client) RepoRoom {
-	return &RepoRoomImpl{
+// NewRoomRepository initializes and returns a new instance of RoomRepo for managing room data in MongoDB.
+func NewRoomRepository(client *mongo.Client) RoomRepo {
+	return &RoomRepoImpl{
 		roomCollection: client.Database(os.Getenv("MONGO_DB_NAME")).Collection("rooms"),
 	}
 }
 
 // CreateRoom inserts a new room document into the database and returns the created room or an error if the operation fails.
-func (r *RepoRoomImpl) CreateRoom(ctx context.Context, rm *Room) (*Room, error) {
+func (r *RoomRepoImpl) CreateRoom(ctx context.Context, rm *Room) (*Room, error) {
 	timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -49,7 +49,7 @@ func (r *RepoRoomImpl) CreateRoom(ctx context.Context, rm *Room) (*Room, error) 
 
 // GetRoomByID retrieves a room by its ID from the database.
 // Returns the room or nil if not found, and an error if any issue occurs during the operation.
-func (r *RepoRoomImpl) GetRoomByID(ctx context.Context, id string) (*Room, error) {
+func (r *RoomRepoImpl) GetRoomByID(ctx context.Context, id string) (*Room, error) {
 	timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -67,7 +67,7 @@ func (r *RepoRoomImpl) GetRoomByID(ctx context.Context, id string) (*Room, error
 }
 
 // UpdateRoomName updates the name of a room identified by its ID in the database and returns the updated room or an error.
-func (r *RepoRoomImpl) UpdateRoomName(ctx context.Context, id string, name string) (*Room, error) {
+func (r *RoomRepoImpl) UpdateRoomName(ctx context.Context, id string, name string) (*Room, error) {
 	timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 

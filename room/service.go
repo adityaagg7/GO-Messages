@@ -4,14 +4,10 @@ import (
 	"context"
 	"errors"
 	"go.mongodb.org/mongo-driver/mongo"
+	"messages-go/models/errormodel"
 	"messages-go/models/request"
 	"messages-go/utils"
 	"strings"
-)
-
-var (
-	ErrRoomNotFound     = errors.New("room not found")
-	ErrMongoWriteFailed = errors.New("mongo write failed")
 )
 
 // RoomService defines the interface for managing room operations, including creation and retrieval of rooms.
@@ -23,11 +19,11 @@ type RoomService interface {
 
 // RoomServiceImpl is a service that handles business logic related to room operations using a room repository.
 type RoomServiceImpl struct {
-	roomRepo RepoRoom
+	roomRepo RoomRepo
 }
 
 // NewRoomService initializes and returns a new instance of RoomServiceImpl with the provided room repository.
-func NewRoomService(roomRepo RepoRoom) *RoomServiceImpl {
+func NewRoomService(roomRepo RoomRepo) *RoomServiceImpl {
 	return &RoomServiceImpl{roomRepo: roomRepo}
 }
 
@@ -48,7 +44,7 @@ func (rs *RoomServiceImpl) CreateRoom(ctx context.Context, req request.CreateRoo
 func (rs *RoomServiceImpl) GetRoom(ctx context.Context, id string) (*Room, error) {
 	room, err := rs.roomRepo.GetRoomByID(ctx, id)
 	if errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, ErrRoomNotFound
+		return nil, errormodel.ErrRoomNotFound
 	}
 	return room, err
 }
@@ -58,9 +54,9 @@ func (rs *RoomServiceImpl) UpdateRoomName(ctx context.Context, id string, name s
 	updatedRoom, err := rs.roomRepo.UpdateRoomName(ctx, id, name)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, ErrRoomNotFound
+			return nil, errormodel.ErrRoomNotFound
 		}
-		return nil, ErrMongoWriteFailed
+		return nil, errormodel.ErrMongoWriteFailed
 	}
 	return updatedRoom, nil
 

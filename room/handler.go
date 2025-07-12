@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
 	"log"
+	"messages-go/models/errormodel"
 	"messages-go/models/request"
 	"messages-go/models/response"
 	"strings"
@@ -74,7 +75,7 @@ func (rh *RoomHandlerImpl) GetRoom(c *fiber.Ctx) error {
 
 	getRoomResp, err := rh.roomService.GetRoom(c.Context(), roomId)
 
-	if errors.Is(err, ErrRoomNotFound) {
+	if errors.Is(err, errormodel.ErrRoomNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(response.APIResponse{
 			Error:   err.Error(),
 			Status:  fiber.StatusNotFound,
@@ -112,13 +113,13 @@ func (rh *RoomHandlerImpl) UpdateRoomName(c *fiber.Ctx) error {
 
 	roomResp, err := rh.roomService.UpdateRoomName(c.Context(), roomId, *req.Name)
 
-	if errors.Is(err, ErrRoomNotFound) {
+	if errors.Is(err, errormodel.ErrRoomNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(response.APIResponse{
 			Error:   err.Error(),
 			Status:  fiber.StatusNotFound,
 			Message: "No Room Found with given id.",
 		})
-	} else if errors.Is(err, ErrMongoWriteFailed) {
+	} else if errors.Is(err, errormodel.ErrMongoWriteFailed) {
 		return c.Status(fiber.StatusInternalServerError).JSON(response.APIResponse{
 			Error:   err.Error(),
 			Status:  fiber.StatusInternalServerError,

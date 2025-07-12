@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"log"
 	"messages-go/internal/databases/mongo/messager"
 	"messages-go/routes"
@@ -20,6 +21,11 @@ func main() {
 	// Create a new Fiber instance
 	app := fiber.New()
 
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowMethods: "GET,POST,OPTIONS",
+		AllowHeaders: "Content-Type",
+	}))
 	// Set up routes
 	routes.SetupRoutes(app, db)
 

@@ -10,5 +10,6 @@ import (
 func GenerateRoomName() string {
 	base := namesgenerator.NewUniqueNameGenerator().Generate()
 	number := rand.Intn(900) + 100
+
 	return fmt.Sprintf("%s-%d", base, number)
 }
