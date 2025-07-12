@@ -42,7 +42,7 @@ func setupRoomRoutes(api fiber.Router, handler room.RoomHandler) {
 func setupMessageRoutes(api fiber.Router, handler message.MessageHandler) {
 	messageGroup := api.Group("/message")
 	messageGroup.Post("/", handler.PostMessage)
-	messageGroup.Get("/:roomName", handler.GetMessages)
+	messageGroup.Get("/:roomId", handler.GetMessages)
 }
 
 func setupWebSocketRoutes(app *fiber.App, wsHandler *ws.Handler) {
